@@ -1,6 +1,10 @@
 package main
 
 import (
+"fmt"
+"bufio"
+"os"
+
 	"github.com/tebeka/selenium"
 	"github.com/xiote/interparkcontroller"
 )
@@ -27,5 +31,12 @@ func Example() {
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
+
+fmt.Print("What is your name? ")
+    scanner := bufio.NewScanner(os.Stdin)
+    for scanner.Scan() {
+        return
+    
+    }
 
 }
