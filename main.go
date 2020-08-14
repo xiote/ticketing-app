@@ -32,7 +32,7 @@ func Example() {
 		panic(err)
 	}
 
-fmt.Print("What is your name? ")
+fmt.Print("Press ENTER or type command to continue")
     scanner := bufio.NewScanner(os.Stdin)
     for scanner.Scan() {
         return
