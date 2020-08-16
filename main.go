@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/xiote/ticketing-app/interpark"
+
 	"github.com/tebeka/selenium"
-	"github.com/xiote/interparkcontroller"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	c := interparkcontroller.NewController2(wd, interparkcontroller.LoginInfo{"xiote12", "gkswlsdn78#"})
+	c := interpark.NewController2(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"})
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
