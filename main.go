@@ -1,9 +1,9 @@
 package main
 
 import (
-"fmt"
-"bufio"
-"os"
+	"bufio"
+	"fmt"
+	"os"
 
 	"github.com/tebeka/selenium"
 	"github.com/xiote/interparkcontroller"
@@ -32,11 +32,11 @@ func Example() {
 		panic(err)
 	}
 
-fmt.Print("Press ENTER or type command to continue")
-    scanner := bufio.NewScanner(os.Stdin)
-    for scanner.Scan() {
-        return
-    
-    }
+	fmt.Print("Press ENTER or type command to continue")
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		return
+
+	}
 
 }
