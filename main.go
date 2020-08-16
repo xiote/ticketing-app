@@ -33,6 +33,25 @@ func Example() {
 		panic(err)
 	}
 
+	if err := c.GotoGoodsInfoPage(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPlayDayPlaySeq(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectSeats(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPrice(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectDelivery(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPayment(); err != nil {
+		panic(err)
+	}
+
 	fmt.Print("Press ENTER or type command to continue")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
