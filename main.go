@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xiote/ticketing-app/interpark"
+	ip "github.com/xiote/ticketing-app/interpark"
 
 	"github.com/tebeka/selenium"
 )
@@ -28,7 +28,15 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	c := interpark.NewController3(wd, "xiote12", "gkswlsdn78#", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", "20200822", "075", []string{"[VIP석] 1층-B구역14열-23", "[VIP석] 1층-B구역14열-24"})
+	loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
+	goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772"}
+	playDatePlaySeqInfo := ip.PlayDatePlaySeqInfo{"20200822", "075"}
+	seatsInfo := ip.SeatsInfo{[]string{"[A석] 2층-C구역9열-31", "[A석] 2층-C구역9열-32"}}
+	priceList := []ip.PriceItem{ip.PriceItem{"A석", "일반", "2"}}
+	priceInfo := ip.PriceInfo{priceList}
+
+	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo)
+
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
@@ -36,15 +44,15 @@ func Example() {
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
 	}
-	if err := c.SelectPlayDayPlaySeq(); err != nil {
+	if err := c.SelectPlayDatePlaySeq(); err != nil {
 		panic(err)
 	}
 	if err := c.SelectSeats(); err != nil {
 		panic(err)
 	}
-	//if err := c.SelectPrice(); err != nil {
-	//	panic(err)
-	//}
+	if err := c.SelectPrice(); err != nil {
+		panic(err)
+	}
 	//if err := c.SelectDelivery(); err != nil {
 	//	panic(err)
 	//}

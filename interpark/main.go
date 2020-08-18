@@ -10,26 +10,48 @@ type LoginInfo struct {
 	PWD string
 }
 
+type PriceItem struct {
+	SeatGradeName  string
+	PriceGradeName string
+	SeatCount      string
+}
+
+type PriceInfo struct {
+	PriceList []PriceItem
+}
+
+type SeatsInfo struct {
+	Seats []string
+}
+
+type PlayDatePlaySeqInfo struct {
+	PlayDate string
+	PlaySeq  string
+}
+
+type GoodsInfo struct {
+	URL string
+}
+
 type Controller struct {
 	selenium.WebDriver
-	LoginID      string
-	LoginPWD     string
-	GoodsInfoUrl string
-	PlayDate     string
-	PlaySeq      string
-	Seats        []string
+	LoginInfo
+	GoodsInfo
+	PlayDatePlaySeqInfo
+	SeatsInfo
+	PriceInfo
 }
 
 func NewController(webDriver selenium.WebDriver) Controller {
-	return Controller{webDriver, "", "", "", "", "", []string{}}
+	return Controller{webDriver, LoginInfo{}, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}}
 }
 
 func NewController2(webDriver selenium.WebDriver, loginInfo LoginInfo) Controller {
-	return Controller{webDriver, loginInfo.ID, loginInfo.PWD, "", "", "", []string{}}
+	return Controller{webDriver, loginInfo, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}}
 }
 
-func NewController3(webDriver selenium.WebDriver, loginID string, loginPWD string, goodsInfoUrl string, playDate string, playSeq string, seats []string) Controller {
-	return Controller{webDriver, loginID, loginPWD, goodsInfoUrl, playDate, playSeq, seats}
+func NewController3(webDriver selenium.WebDriver, loginInfo LoginInfo, goodsInfo GoodsInfo, playDatePlaySeqInfo PlayDatePlaySeqInfo, seatsInfo SeatsInfo, priceInfo PriceInfo) Controller {
+	return Controller{webDriver, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo}
 }
 
 func (c *Controller) Navigate(url string) error {
@@ -42,7 +64,7 @@ func (c *Controller) GotoGoodsInfoPage() error {
 	// 티켓오픈시까지 새로고침
 	isOpen := false
 	for !isOpen {
-		if err = c.WebDriver.Get(c.GoodsInfoUrl); err != nil {
+		if err = c.WebDriver.Get(c.GoodsInfo.URL); err != nil {
 			panic(err)
 		}
 
@@ -56,7 +78,7 @@ func (c *Controller) GotoGoodsInfoPage() error {
 	return nil
 }
 
-func (c *Controller) SelectPlayDayPlaySeq() error {
+func (c *Controller) SelectPlayDatePlaySeq() error {
 	var condition selenium.Condition
 	var webElement selenium.WebElement
 	var err error
@@ -86,7 +108,7 @@ func (c *Controller) SelectPlayDayPlaySeq() error {
 		panic(err)
 	}
 
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[contains(@onclick,'"+c.PlayDate+"')]"); err != nil {
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[contains(@onclick,'"+c.PlayDatePlaySeqInfo.PlayDate+"')]"); err != nil {
 		panic(err)
 	}
 	if err := webElement.Click(); err != nil {
@@ -104,7 +126,7 @@ func (c *Controller) SelectPlayDayPlaySeq() error {
 		panic(err)
 	}
 
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//ul[@id='ulPlaySeq']//label[contains(@onclick,'"+c.PlaySeq+"')]"); err != nil {
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//ul[@id='ulPlaySeq']//label[contains(@onclick,'"+c.PlayDatePlaySeqInfo.PlaySeq+"')]"); err != nil {
 		panic(err)
 	}
 	if err := webElement.Click(); err != nil {
@@ -201,6 +223,67 @@ func (c *Controller) SelectSeats() error {
 }
 
 func (c *Controller) SelectPrice() error {
+	var err error
+	var webElement selenium.WebElement
+	var condition selenium.Condition
+
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	for _, priceItem := range c.PriceInfo.PriceList {
+
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"']//option[@value='"+priceItem.SeatCount+"']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+	}
+
+	// <a href="javascript:fnNextStep('P');" id="SmallNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_next_02_on.gif" alt="다음단계" id="SmallNextBtnImage"></a>
+	// 주의 : 위의 경우 anchor가 아닌 image를 클릭해야 한다.
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@id='SmallNextBtnImage']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
@@ -278,14 +361,14 @@ func (c *Controller) Login() error {
 	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "userId"); err != nil {
 		panic(err)
 	}
-	if err = webElement.SendKeys(c.LoginID); err != nil {
+	if err = webElement.SendKeys(c.LoginInfo.ID); err != nil {
 		panic(err)
 	}
 
 	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "userPwd"); err != nil {
 		panic(err)
 	}
-	if err = webElement.SendKeys(c.LoginPWD); err != nil {
+	if err = webElement.SendKeys(c.LoginInfo.PWD); err != nil {
 		panic(err)
 	}
 
