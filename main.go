@@ -28,7 +28,7 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	c := interpark.NewController2(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"})
+	c := interpark.NewController3(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"}, "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", interpark.PlayDatePlaySeq{"20200819", "070"})
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
@@ -36,21 +36,21 @@ func Example() {
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
 	}
-	if err := c.SelectPlayDayPlaySeq(); err != nil {
-		panic(err)
-	}
-	if err := c.SelectSeats(); err != nil {
-		panic(err)
-	}
-	if err := c.SelectPrice(); err != nil {
-		panic(err)
-	}
-	if err := c.SelectDelivery(); err != nil {
-		panic(err)
-	}
-	if err := c.SelectPayment(); err != nil {
-		panic(err)
-	}
+	//if err := c.SelectPlayDayPlaySeq(); err != nil {
+	//	panic(err)
+	//}
+	//if err := c.SelectSeats(); err != nil {
+	//	panic(err)
+	//}
+	//if err := c.SelectPrice(); err != nil {
+	//	panic(err)
+	//}
+	//if err := c.SelectDelivery(); err != nil {
+	//	panic(err)
+	//}
+	//if err := c.SelectPayment(); err != nil {
+	//	panic(err)
+	//}
 
 	fmt.Print("Press ENTER or type command to continue")
 	scanner := bufio.NewScanner(os.Stdin)
