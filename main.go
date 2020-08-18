@@ -28,7 +28,7 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	c := interpark.NewController3(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"}, "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", "20200822", "075")
+	c := interpark.NewController3(wd, "xiote12", "gkswlsdn78#", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", "20200822", "075", []string{"[VIP석] 1층-B구역14열-23", "[VIP석] 1층-B구역14열-24"})
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
@@ -39,9 +39,9 @@ func Example() {
 	if err := c.SelectPlayDayPlaySeq(); err != nil {
 		panic(err)
 	}
-	//if err := c.SelectSeats(); err != nil {
-	//	panic(err)
-	//}
+	if err := c.SelectSeats(); err != nil {
+		panic(err)
+	}
 	//if err := c.SelectPrice(); err != nil {
 	//	panic(err)
 	//}

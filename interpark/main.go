@@ -12,22 +12,24 @@ type LoginInfo struct {
 
 type Controller struct {
 	selenium.WebDriver
-	LoginInfo
+	LoginID      string
+	LoginPWD     string
 	GoodsInfoUrl string
 	PlayDate     string
 	PlaySeq      string
+	Seats        []string
 }
 
 func NewController(webDriver selenium.WebDriver) Controller {
-	return Controller{webDriver, LoginInfo{}, "", "", ""}
+	return Controller{webDriver, "", "", "", "", "", []string{}}
 }
 
 func NewController2(webDriver selenium.WebDriver, loginInfo LoginInfo) Controller {
-	return Controller{webDriver, loginInfo, "", "", ""}
+	return Controller{webDriver, loginInfo.ID, loginInfo.PWD, "", "", "", []string{}}
 }
 
-func NewController3(webDriver selenium.WebDriver, loginInfo LoginInfo, goodsInfoUrl string, playDate string, playSeq string) Controller {
-	return Controller{webDriver, loginInfo, goodsInfoUrl, playDate, playSeq}
+func NewController3(webDriver selenium.WebDriver, loginID string, loginPWD string, goodsInfoUrl string, playDate string, playSeq string, seats []string) Controller {
+	return Controller{webDriver, loginID, loginPWD, goodsInfoUrl, playDate, playSeq, seats}
 }
 
 func (c *Controller) Navigate(url string) error {
@@ -119,6 +121,82 @@ func (c *Controller) SelectPlayDayPlaySeq() error {
 }
 
 func (c *Controller) SelectSeats() error {
+	var err error
+	var webElement selenium.WebElement
+	var windowHandles []string
+	var condition selenium.Condition
+
+	if windowHandles, err = c.WebDriver.WindowHandles(); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchWindow(windowHandles[1]); err != nil {
+		panic(err)
+	}
+
+	// <img src="//ticketimage.interpark.com/TicketImage/onestop/cost_close.gif" alt="닫기">
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[@class='closeBtn']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
+	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+	// <iframe id="ifrmSeatDetail" name="ifrmSeatDetail" scrolling="auto" width="658px" height="619px" marginwidth="0" marginheight="0" frameborder="no" src=""></iframe>
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	//var pageSource string
+	//pageSource, err = c.WebDriver.PageSource()
+	//fmt.Printf("%s\n", pageSource)
+
+	// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:335 ;top:241" alt="[VIP석] 1층-B구역14열-23" title="[VIP석] 1층-B구역14열-23" onclick="javascript: SelectSeat('SID49', '1', '1층', 'B구역14열', '23', '002')">
+	for _, seat := range c.Seats {
+		if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//img[@title='"+seat+"']"); err != nil {
+			panic(err)
+		}
+		if err := webElement.Click(); err != nil {
+			panic(err)
+		}
+	}
+	// <a href="javascript:;" onclick="fnSelect();"><img id="NextStepImage" src="http://ticketimage.interpark.com/TicketImage/onestop/btn_seat_confirm_on.gif" alt="좌석선택완료"></a>
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+
+	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnSelect();']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
@@ -200,14 +278,14 @@ func (c *Controller) Login() error {
 	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "userId"); err != nil {
 		panic(err)
 	}
-	if err = webElement.SendKeys(c.LoginInfo.ID); err != nil {
+	if err = webElement.SendKeys(c.LoginID); err != nil {
 		panic(err)
 	}
 
 	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "userPwd"); err != nil {
 		panic(err)
 	}
-	if err = webElement.SendKeys(c.LoginInfo.PWD); err != nil {
+	if err = webElement.SendKeys(c.LoginPWD); err != nil {
 		panic(err)
 	}
 
