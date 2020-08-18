@@ -28,7 +28,7 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	c := interpark.NewController3(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"}, "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", interpark.PlayDatePlaySeq{"20200819", "070"})
+	c := interpark.NewController3(wd, interpark.LoginInfo{"xiote12", "gkswlsdn78#"}, "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=20003772", "20200822", "075")
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
@@ -36,9 +36,9 @@ func Example() {
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
 	}
-	//if err := c.SelectPlayDayPlaySeq(); err != nil {
-	//	panic(err)
-	//}
+	if err := c.SelectPlayDayPlaySeq(); err != nil {
+		panic(err)
+	}
 	//if err := c.SelectSeats(); err != nil {
 	//	panic(err)
 	//}
