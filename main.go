@@ -3,9 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
-
 	ip "github.com/xiote/ticketing-app/interpark"
+	"os"
 
 	"github.com/tebeka/selenium"
 )
@@ -31,14 +30,22 @@ func Example() {
 	loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
 	goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772"}
 	playDatePlaySeqInfo := ip.PlayDatePlaySeqInfo{"20200822", "075"}
-	seatsInfo := ip.SeatsInfo{[]string{"[A석] 2층-C구역9열-31", "[A석] 2층-C구역9열-32"}}
+	seatsInfo := ip.SeatsInfo{[]string{"[A석] 2층-C구역9열-35", "[A석] 2층-C구역9열-36"}}
 	priceList := []ip.PriceItem{ip.PriceItem{"A석", "일반", "2"}}
 	priceInfo := ip.PriceInfo{priceList}
+	deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
+	paymentInfo := ip.PaymentInfo{"22003", "C1", "신한카드"}
 
-	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo)
+	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
 
 	if err := c.Login(); err != nil {
 		panic(err)
+	}
+	var scanner *bufio.Scanner
+	fmt.Print("Press ENTER to continue")
+	scanner = bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		break
 	}
 
 	if err := c.GotoGoodsInfoPage(); err != nil {
@@ -53,18 +60,20 @@ func Example() {
 	if err := c.SelectPrice(); err != nil {
 		panic(err)
 	}
-	//if err := c.SelectDelivery(); err != nil {
-	//	panic(err)
-	//}
-	//if err := c.SelectPayment(); err != nil {
-	//	panic(err)
-	//}
+	if err := c.SelectDelivery(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPayment(); err != nil {
+		panic(err)
+	}
+	if err := c.DoPay(); err != nil {
+		panic(err)
+	}
 
-	fmt.Print("Press ENTER or type command to continue")
-	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Press ENTER to continue")
+	scanner = bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		return
-
+		break
 	}
 
 }

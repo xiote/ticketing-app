@@ -3,7 +3,19 @@ package interpark
 import (
 	"fmt"
 	"github.com/tebeka/selenium"
+	"time"
 )
+
+type PaymentInfo struct {
+	PaymentType   string
+	PaymentSelect string
+	DiscountCard  string
+}
+
+type DeliveryInfo struct {
+	DeliveryType string
+	YYMMDD       string
+}
 
 type LoginInfo struct {
 	ID  string
@@ -40,18 +52,20 @@ type Controller struct {
 	PlayDatePlaySeqInfo
 	SeatsInfo
 	PriceInfo
+	DeliveryInfo
+	PaymentInfo
 }
 
 func NewController(webDriver selenium.WebDriver) Controller {
-	return Controller{webDriver, LoginInfo{}, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}}
+	return Controller{webDriver, LoginInfo{}, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}, DeliveryInfo{}, PaymentInfo{}}
 }
 
 func NewController2(webDriver selenium.WebDriver, loginInfo LoginInfo) Controller {
-	return Controller{webDriver, loginInfo, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}}
+	return Controller{webDriver, loginInfo, GoodsInfo{}, PlayDatePlaySeqInfo{}, SeatsInfo{}, PriceInfo{}, DeliveryInfo{}, PaymentInfo{}}
 }
 
-func NewController3(webDriver selenium.WebDriver, loginInfo LoginInfo, goodsInfo GoodsInfo, playDatePlaySeqInfo PlayDatePlaySeqInfo, seatsInfo SeatsInfo, priceInfo PriceInfo) Controller {
-	return Controller{webDriver, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo}
+func NewController3(webDriver selenium.WebDriver, loginInfo LoginInfo, goodsInfo GoodsInfo, playDatePlaySeqInfo PlayDatePlaySeqInfo, seatsInfo SeatsInfo, priceInfo PriceInfo, deliveryInfo DeliveryInfo, paymentInfo PaymentInfo) Controller {
+	return Controller{webDriver, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo}
 }
 
 func (c *Controller) Navigate(url string) error {
@@ -179,10 +193,20 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 	// <iframe id="ifrmSeatDetail" name="ifrmSeatDetail" scrolling="auto" width="658px" height="619px" marginwidth="0" marginheight="0" frameborder="no" src=""></iframe>
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
-		panic(err)
+
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
 	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+
+	if err = c.WebDriver.Wait(condition); err != nil {
 		panic(err)
 	}
 
@@ -240,7 +264,7 @@ func (c *Controller) SelectPrice() error {
 	for _, priceItem := range c.PriceInfo.PriceList {
 
 		condition = func(wd selenium.WebDriver) (bool, error) {
-			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"']"); err != nil {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"' and @pricegradename='"+priceItem.PriceGradeName+"']"); err != nil {
 				//panic(err)
 				return false, nil
 			}
@@ -248,7 +272,7 @@ func (c *Controller) SelectPrice() error {
 				//panic(err)
 				return false, nil
 			}
-			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"']//option[@value='"+priceItem.SeatCount+"']"); err != nil {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"' and @pricegradename='"+priceItem.PriceGradeName+"']//option[@value='"+priceItem.SeatCount+"']"); err != nil {
 				//panic(err)
 				return false, nil
 			}
@@ -288,10 +312,184 @@ func (c *Controller) SelectPrice() error {
 }
 
 func (c *Controller) SelectDelivery() error {
+	var err error
+	var webElement selenium.WebElement
+	var condition selenium.Condition
+
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	// <input type="radio" class="chk" id="Delivery" name="Delivery" value="24000" onclick="fnChange()">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@id='Delivery' and @value='"+c.DeliveryInfo.DeliveryType+"']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
+	// <input type="text" id="YYMMDD" name="YYMMDD" style="width:45px;" class="txt1" maxlength="6" onkeyup="fnMoveFocus(6, 'YYMMDD', 'HpNo1');">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@id='YYMMDD']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.SendKeys(c.DeliveryInfo.YYMMDD); err != nil {
+		panic(err)
+	}
+
+	// <a href="javascript:fnNextStep('P');" id="SmallNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_next_02_on.gif" alt="다음단계" id="SmallNextBtnImage"></a>
+	// 주의 : 위의 경우 anchor가 아닌 image를 클릭해야 한다.
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@id='SmallNextBtnImage']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
 func (c *Controller) SelectPayment() error {
+	var err error
+	var webElement selenium.WebElement
+	var condition selenium.Condition
+
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	// <input type="radio" class="chk" name="Payment" value="22003" kindofsettle="22003" onclick="fnCheckPayment(this);">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@name='Payment' and @value='"+c.PaymentInfo.PaymentType+"']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
+	// <input type="radio" class="chk" name="PaymentSelect" id="PaymentSelect" value="C1" kindofsettle="22003" kindofsettledetail="12001" onclick="fnPaymentSelect(this.value);">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@name='PaymentSelect' and @value='"+c.PaymentInfo.PaymentSelect+"']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
+	// <select id="DiscountCard" onchange="fnCardSelect(this.value);"><option value="">카드종류를 선택하세요.</option><option value="62">KB국민카드</option></select>
+
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@id='DiscountCard']//option[text()='"+c.PaymentInfo.DiscountCard+"']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
+	// <a href="javascript:fnNextStep('P');" id="SmallNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_next_02.gif" alt="다음단계" id="SmallNextBtnImage"></a>
+	// 주의 : 위의 경우 anchor가 아닌 image를 클릭해야 한다.
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@id='SmallNextBtnImage']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		// 결제오류 때문에 Sleep
+		time.Sleep(1 * time.Second)
+
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
+func (c *Controller) DoPay() error {
+	var err error
+	var webElement selenium.WebElement
+	var condition selenium.Condition
+
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
+		panic(err)
+	}
+	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		panic(err)
+	}
+
+	// <input id="CancelAgree" onclick="fnCheckCancelAgree()" type="checkbox">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@id='CancelAgree']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
+	// <input id="CancelAgree2" onclick="fnCheckCancelAgree()" type="checkbox">
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@id='CancelAgree2']"); err != nil {
+		panic(err)
+	}
+	if err := webElement.Click(); err != nil {
+		panic(err)
+	}
+
+	// <a href="javascript:fnNextStep('P');" id="LargeNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_buy.gif" alt="다음단계" id="LargeNextBtnImage"> </a>
+	// 주의 : 위의 경우 anchor가 아닌 image를 클릭해야 한다.
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
+		panic(err)
+	}
+	condition = func(wd selenium.WebDriver) (bool, error) {
+		if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@id='LargeNextBtnImage']"); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		if err := webElement.Click(); err != nil {
+			//panic(err)
+			return false, nil
+		}
+		return true, nil
+	}
+	if err = c.WebDriver.Wait(condition); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
