@@ -27,15 +27,15 @@ func Example() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
-	goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772"}
-	//playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo("20200822", "075")
-	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200822", "18시 30분")
-	seatsInfo := ip.NewSeatsInfo([]string{"[A석] 2층-C구역9열-31", "[A석] 2층-C구역9열-32"})
-	priceList := []ip.PriceItem{ip.PriceItem{"A석", "일반", "2"}}
-	priceInfo := ip.PriceInfo{priceList}
-	deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
-	paymentInfo := ip.NewPaymentInfo("22003", "C1", "신한카드")
+	// loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
+	// goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772"}
+	// //playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo("20200822", "075")
+	// playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200822", "18시 30분")
+	// seatsInfo := ip.NewSeatsInfo([]string{"[A석] 2층-C구역9열-31", "[A석] 2층-C구역9열-32"})
+	// priceList := []ip.PriceItem{ip.PriceItem{"A석", "일반", "2"}}
+	// priceInfo := ip.PriceInfo{priceList}
+	// deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
+	// paymentInfo := ip.NewPaymentInfo("22003", "C1", "신한카드")
 
 	// loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
 	// goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20005097"}
@@ -45,6 +45,15 @@ func Example() {
 	// priceInfo := ip.PriceInfo{priceList}
 	// deliveryInfo := ip.DeliveryInfo{"24001", "781025"}
 	// paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
+
+	loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
+	goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380"}
+	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20201121", "19시 00분")
+	seatsInfo := ip.NewSeatsInfo2([]string{"[VIP석] 객석1층-20열-21", "[VIP석] 객석1층-20열-22"}, "N", "N", "N", "")
+	priceList := []ip.PriceItem{ip.PriceItem{"VIP석", "일반", "2"}}
+	priceInfo := ip.PriceInfo{priceList}
+	deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
+	paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
 
 	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
 

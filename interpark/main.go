@@ -217,7 +217,7 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
-	if c.SeatsInfo.CloseBtnYN != "N" {
+	if c.SeatsInfo.CloseBtnYN == "Y" {
 		// <img src="//ticketimage.interpark.com/TicketImage/onestop/cost_close.gif" alt="닫기">
 		condition = func(wd selenium.WebDriver) (bool, error) {
 			if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[@class='closeBtn']"); err != nil {
@@ -251,7 +251,7 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
-	if c.SeatsInfo.CaptchaYN != "N" {
+	if c.SeatsInfo.CaptchaYN == "Y" {
 		// <input type="text" id="txtCaptcha" name="txtCaptcha" value="" maxlength="8" onkeydown="IsEnterGo();" style="text-transform:uppercase;ime-mode:inactive;">
 		condition = func(wd selenium.WebDriver) (bool, error) {
 
