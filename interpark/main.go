@@ -10,6 +10,15 @@ type PaymentInfo struct {
 	PaymentType   string
 	PaymentSelect string
 	DiscountCard  string
+	BankName      string
+}
+
+func NewPaymentInfo(paymentType string, paymentSelect string, discountCard string) PaymentInfo {
+	return PaymentInfo{paymentType, paymentSelect, discountCard, ""}
+}
+
+func NewPaymentInfo2(paymentType string, paymentSelect string, discountCard string, bankName string) PaymentInfo {
+	return PaymentInfo{paymentType, paymentSelect, discountCard, bankName}
 }
 
 type DeliveryInfo struct {
@@ -33,12 +42,24 @@ type PriceInfo struct {
 }
 
 type SeatsInfo struct {
-	Seats []string
+	Seats      []string
+	CloseBtnYN string
+	CaptchaYN  string
+	AreaYN     string
+	AreaName   string
+}
+
+func NewSeatsInfo(seats []string) SeatsInfo {
+	return SeatsInfo{seats, "Y", "N", "N", ""}
+}
+func NewSeatsInfo2(seats []string, closeBtnYN string, captchaYN string, areaYN string, areaName string) SeatsInfo {
+	return SeatsInfo{seats, closeBtnYN, captchaYN, areaYN, areaName}
 }
 
 type PlayDatePlaySeqInfo struct {
-	PlayDate string
-	PlaySeq  string
+	PlayDate    string
+	PlaySeq     string
+	PlaySeqText string
 }
 
 type GoodsInfo struct {
@@ -54,6 +75,14 @@ type Controller struct {
 	PriceInfo
 	DeliveryInfo
 	PaymentInfo
+}
+
+func NewPlayDatePlaySeqInfo(playDate string, playSeq string) PlayDatePlaySeqInfo {
+	return PlayDatePlaySeqInfo{playDate, playSeq, ""}
+}
+
+func NewPlayDatePlaySeqInfo2(playDate string, playSeqText string) PlayDatePlaySeqInfo {
+	return PlayDatePlaySeqInfo{playDate, "", playSeqText}
 }
 
 func NewController(webDriver selenium.WebDriver) Controller {
@@ -133,19 +162,38 @@ func (c *Controller) SelectPlayDatePlaySeq() error {
 
 	c.WebDriver.SwitchFrame(nil)
 
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//div[@class='myValue']"); err != nil {
+	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//div[contains(@class, 'myValue')]"); err != nil {
 		panic(err)
 	}
 	if err := webElement.Click(); err != nil {
 		panic(err)
 	}
 
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//ul[@id='ulPlaySeq']//label[contains(@onclick,'"+c.PlayDatePlaySeqInfo.PlaySeq+"')]"); err != nil {
-		panic(err)
+	if c.PlayDatePlaySeqInfo.PlaySeqText != "" {
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//ul[@id='ulPlaySeq']//label[contains(text(),'"+c.PlayDatePlaySeqInfo.PlaySeqText+"')]"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
 	}
-	if err := webElement.Click(); err != nil {
-		panic(err)
+	if c.PlayDatePlaySeqInfo.PlaySeq != "" {
+		if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//ul[@id='ulPlaySeq']//label[contains(@onclick,'"+c.PlayDatePlaySeqInfo.PlaySeq+"')]"); err != nil {
+			panic(err)
+		}
+		if err := webElement.Click(); err != nil {
+			panic(err)
+		}
 	}
+
 	// <a href="#" onclick="javascript:NoMemPrivacyCertify('','20003772');" class="btn_rev"><span>예매하기</span></a>
 	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//div[@class='tk_dt_btn_TArea']//a[@class='btn_rev']"); err != nil {
 		panic(err)
@@ -169,13 +217,31 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
-	// <img src="//ticketimage.interpark.com/TicketImage/onestop/cost_close.gif" alt="닫기">
+	if c.SeatsInfo.CloseBtnYN != "N" {
+		// <img src="//ticketimage.interpark.com/TicketImage/onestop/cost_close.gif" alt="닫기">
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[@class='closeBtn']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+	}
+
+	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
 	condition = func(wd selenium.WebDriver) (bool, error) {
-		if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[@class='closeBtn']"); err != nil {
+		if webElement, err = wd.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
 			//panic(err)
 			return false, nil
 		}
-		if err := webElement.Click(); err != nil {
+		if err = c.WebDriver.SwitchFrame(webElement); err != nil {
 			//panic(err)
 			return false, nil
 		}
@@ -185,15 +251,124 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
-	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
-		panic(err)
-	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
-		panic(err)
-	}
-	// <iframe id="ifrmSeatDetail" name="ifrmSeatDetail" scrolling="auto" width="658px" height="619px" marginwidth="0" marginheight="0" frameborder="no" src=""></iframe>
+	if c.SeatsInfo.CaptchaYN != "N" {
+		// <input type="text" id="txtCaptcha" name="txtCaptcha" value="" maxlength="8" onkeydown="IsEnterGo();" style="text-transform:uppercase;ime-mode:inactive;">
+		condition = func(wd selenium.WebDriver) (bool, error) {
 
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//div[contains(@class, 'validationTxt')]"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//input[@id='txtCaptcha']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+		// 6자리 입력 대기
+		condition = func(wd selenium.WebDriver) (bool, error) {
+
+			var activeElement selenium.WebElement
+			if activeElement, err = wd.ActiveElement(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			var idString string
+			if idString, err = activeElement.GetAttribute("id"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//input[@id='txtCaptcha']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+
+			if idString != "txtCaptcha" {
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//div[contains(@class, 'validationTxt')]"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				if err := webElement.Click(); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//input[@id='txtCaptcha']"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				if err := webElement.Click(); err != nil {
+					//panic(err)
+					return false, nil
+				}
+
+				return false, nil
+			}
+
+			var valueString string
+			if valueString, err = webElement.GetAttribute("value"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+
+			if len(valueString) < 6 {
+				fmt.Println(valueString)
+				return false, nil
+			}
+
+			// 입력완료
+			// <a href="javascript:;" onclick="fnCheck()">입력완료</a>
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[text()='입력완료']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			// <div id="divRecaptcha" class="capchaLayer" style=""></div>
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//div[@id='divRecaptcha']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			var isDisplayed bool
+			if isDisplayed, err = webElement.IsDisplayed(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if isDisplayed {
+
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//input[@id='txtCaptcha']"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				if err := webElement.Click(); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+	}
+
+	// <iframe id="ifrmSeatDetail" name="ifrmSeatDetail" scrolling="auto" width="658px" height="619px" marginwidth="0" marginheight="0" frameborder="no" src=""></iframe>
 	condition = func(wd selenium.WebDriver) (bool, error) {
 		if webElement, err = wd.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
 			//panic(err)
@@ -210,16 +385,57 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
+	if c.SeatsInfo.AreaYN == "Y" {
+		// <area shape="rect" coords="446,425,591,447" onfocus="this.blur()" href="javascript:GetBlockSeatList('', '', '306')" onmouseover="javascript:EventBlockOver(this, '306')" onmouseout="javascript:EventBlockOut(this, '306')">
+
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//area[contains(@href, '"+c.SeatsInfo.AreaName+"')]"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err = webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+		// <td bgcolor="#EBEBEB"><img src="//ticketimage.interpark.com/TicketImage/event/061227/dot_03.gif" width="5" height="5" align="absmiddle"> <b><font color="#3300FF">306 영역</font>의 좌석배치도입니다</b></td>
+
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//font[@color='#3300FF' and text()='"+c.SeatsInfo.AreaName+" 영역']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+	}
+
 	//var pageSource string
 	//pageSource, err = c.WebDriver.PageSource()
 	//fmt.Printf("%s\n", pageSource)
 
 	// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:335 ;top:241" alt="[VIP석] 1층-B구역14열-23" title="[VIP석] 1층-B구역14열-23" onclick="javascript: SelectSeat('SID49', '1', '1층', 'B구역14열', '23', '002')">
 	for _, seat := range c.Seats {
-		if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//img[@title='"+seat+"']"); err != nil {
-			panic(err)
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@title='"+seat+"'] | //span[@title='"+seat+"']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
 		}
-		if err := webElement.Click(); err != nil {
+		if err = c.WebDriver.Wait(condition); err != nil {
 			panic(err)
 		}
 	}
@@ -342,6 +558,25 @@ func (c *Controller) SelectDelivery() error {
 		panic(err)
 	}
 
+	if c.DeliveryInfo.DeliveryType == "24001" {
+		// <input type="checkbox" id="chkSyncAddress" onclick="javascript:fnSyncAddress()">
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//input[@id='chkSyncAddress']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
+
+	}
+
 	// <a href="javascript:fnNextStep('P');" id="SmallNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_next_02_on.gif" alt="다음단계" id="SmallNextBtnImage"></a>
 	// 주의 : 위의 경우 anchor가 아닌 image를 클릭해야 한다.
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
@@ -388,29 +623,49 @@ func (c *Controller) SelectPayment() error {
 		panic(err)
 	}
 
-	// <input type="radio" class="chk" name="PaymentSelect" id="PaymentSelect" value="C1" kindofsettle="22003" kindofsettledetail="12001" onclick="fnPaymentSelect(this.value);">
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@name='PaymentSelect' and @value='"+c.PaymentInfo.PaymentSelect+"']"); err != nil {
-		panic(err)
-	}
-	if err := webElement.Click(); err != nil {
-		panic(err)
+	if c.PaymentInfo.PaymentType == "22004" {
+		// <select id="BankCode" onchange="fnSelectBankCode(this.value)"><option value="">입금하실 은행을 선택하세요.</option><option value="38052">농협(중앙)</option></select>
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@id='BankCode']//option[text()='"+c.PaymentInfo.BankName+"']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
 	}
 
-	// <select id="DiscountCard" onchange="fnCardSelect(this.value);"><option value="">카드종류를 선택하세요.</option><option value="62">KB국민카드</option></select>
-
-	condition = func(wd selenium.WebDriver) (bool, error) {
-		if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@id='DiscountCard']//option[text()='"+c.PaymentInfo.DiscountCard+"']"); err != nil {
-			//panic(err)
-			return false, nil
+	if c.PaymentInfo.PaymentType == "22003" {
+		// <input type="radio" class="chk" name="PaymentSelect" id="PaymentSelect" value="C1" kindofsettle="22003" kindofsettledetail="12001" onclick="fnPaymentSelect(this.value);">
+		if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//input[@name='PaymentSelect' and @value='"+c.PaymentInfo.PaymentSelect+"']"); err != nil {
+			panic(err)
 		}
 		if err := webElement.Click(); err != nil {
-			//panic(err)
-			return false, nil
+			panic(err)
 		}
-		return true, nil
-	}
-	if err = c.WebDriver.Wait(condition); err != nil {
-		panic(err)
+
+		// <select id="DiscountCard" onchange="fnCardSelect(this.value);"><option value="">카드종류를 선택하세요.</option><option value="62">KB국민카드</option></select>
+
+		condition = func(wd selenium.WebDriver) (bool, error) {
+			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@id='DiscountCard']//option[text()='"+c.PaymentInfo.DiscountCard+"']"); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				return false, nil
+			}
+			return true, nil
+		}
+		if err = c.WebDriver.Wait(condition); err != nil {
+			panic(err)
+		}
 	}
 
 	// <a href="javascript:fnNextStep('P');" id="SmallNextBtnLink" onfocus="this.blur();"><img src="http://ticketimage.interpark.com/TicketImage/onestop/btn_next_02.gif" alt="다음단계" id="SmallNextBtnImage"></a>
@@ -424,7 +679,7 @@ func (c *Controller) SelectPayment() error {
 			return false, nil
 		}
 		// 결제오류 때문에 Sleep
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 
 		if err := webElement.Click(); err != nil {
 			//panic(err)
