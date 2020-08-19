@@ -46,13 +46,22 @@ func Example() {
 	// deliveryInfo := ip.DeliveryInfo{"24001", "781025"}
 	// paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
 
-	loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
-	goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380"}
-	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20201121", "19시 00분")
-	seatsInfo := ip.NewSeatsInfo2([]string{"[VIP석] 객석1층-20열-21", "[VIP석] 객석1층-20열-22"}, "N", "N", "N", "")
-	priceList := []ip.PriceItem{ip.PriceItem{"VIP석", "일반", "2"}}
+	// loginInfo := ip.LoginInfo{"xiote12", "gkswlsdn78#"}
+	// goodsInfo := ip.GoodsInfo{"http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380"}
+	// playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20201121", "19시 00분")
+	// seatsInfo := ip.NewSeatsInfo2([]string{"[VIP석] 객석1층-20열-21", "[VIP석] 객석1층-20열-22"}, "N", "N", "N", "")
+	// priceList := []ip.PriceItem{ip.PriceItem{"VIP석", "일반", "2"}}
+	// priceInfo := ip.PriceInfo{priceList}
+	// deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
+	// paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
+
+	loginInfo := ip.NewLoginInfo2("chmartha", "ch079577#", "sac.or.kr")
+	goodsInfo := ip.GoodsInfo{"http://www.sac.or.kr/SacHome/perform/detail?searchSeq=43549"}
+	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200905", "17시 00분")
+	seatsInfo := ip.NewSeatsInfo2([]string{"[R석] 1층-C블록10열-8"}, "N", "N", "N", "")
+	priceList := []ip.PriceItem{ip.PriceItem{"R석", "일반", "1"}}
 	priceInfo := ip.PriceInfo{priceList}
-	deliveryInfo := ip.DeliveryInfo{"24000", "781025"}
+	deliveryInfo := ip.DeliveryInfo{"24000", "771110", "chmartha@naver.com"}
 	paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
 
 	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
@@ -61,11 +70,11 @@ func Example() {
 		panic(err)
 	}
 	var scanner *bufio.Scanner
-	//fmt.Print("Press ENTER to continue")
-	//scanner = bufio.NewScanner(os.Stdin)
-	//for scanner.Scan() {
-	//	break
-	//}
+	fmt.Print("Press ENTER to continue")
+	scanner = bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		break
+	}
 
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
