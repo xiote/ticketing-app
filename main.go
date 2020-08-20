@@ -55,11 +55,11 @@ func DoWork() {
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
-	//fmt.Print("Press ENTER to continue")
-	//scanner = bufio.NewScanner(os.Stdin)
-	//for scanner.Scan() {
-	//	break
-	//}
+	fmt.Print("Press ENTER to continue")
+	scanner = bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		break
+	}
 
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
