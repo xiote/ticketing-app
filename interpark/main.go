@@ -53,23 +53,31 @@ type PriceItem struct {
 	SeatCount      string
 }
 
+func NewPriceItem(seatGradeName string, priceGradeName string, seatCount string) PriceItem {
+	return PriceItem{seatGradeName, priceGradeName, seatCount}
+}
+
 type PriceInfo struct {
 	PriceList []PriceItem
 }
 
+func NewPriceInfo(priceList []PriceItem) PriceInfo {
+	return PriceInfo{priceList}
+}
+
 type SeatsInfo struct {
-	Seats      []string
-	CloseBtnYN string
-	CaptchaYN  string
-	AreaYN     string
-	AreaName   string
+	Seats           []string
+	ClickCloseBtnYN string
+	CaptchaYN       string
+	AreaYN          string
+	AreaName        string
 }
 
 func NewSeatsInfo(seats []string) SeatsInfo {
 	return SeatsInfo{seats, "Y", "N", "N", ""}
 }
-func NewSeatsInfo2(seats []string, closeBtnYN string, captchaYN string, areaYN string, areaName string) SeatsInfo {
-	return SeatsInfo{seats, closeBtnYN, captchaYN, areaYN, areaName}
+func NewSeatsInfo2(seats []string, clickCloseBtnYN string, captchaYN string, areaYN string, areaName string) SeatsInfo {
+	return SeatsInfo{seats, clickCloseBtnYN, captchaYN, areaYN, areaName}
 }
 
 type PlayDatePlaySeqInfo struct {
@@ -80,6 +88,10 @@ type PlayDatePlaySeqInfo struct {
 
 type GoodsInfo struct {
 	URL string
+}
+
+func NewGoodsInfo(url string) GoodsInfo {
+	return GoodsInfo{url}
 }
 
 type Controller struct {
@@ -345,7 +357,7 @@ func (c *Controller) SelectSeats() error {
 		panic(err)
 	}
 
-	if c.SeatsInfo.CloseBtnYN == "Y" {
+	if c.SeatsInfo.ClickCloseBtnYN == "Y" {
 		// <img src="//ticketimage.interpark.com/TicketImage/onestop/cost_close.gif" alt="닫기">
 		condition = func(wd selenium.WebDriver) (bool, error) {
 			if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[@class='closeBtn']"); err != nil {
