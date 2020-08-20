@@ -35,16 +35,21 @@ func NewDeliveryInfo(deliveryType string, yymmdd string) DeliveryInfo {
 }
 
 type LoginInfo struct {
-	ID       string
-	PWD      string
-	SiteName string
+	ID          string
+	PWD         string
+	SiteName    string
+	RedirectYN  string
+	RedirectUrl string
 }
 
+func NewLoginInfo3(id string, pwd string, siteName string, redirectYN string, redirectUrl string) LoginInfo {
+	return LoginInfo{id, pwd, siteName, redirectYN, redirectUrl}
+}
 func NewLoginInfo2(id string, pwd string, siteName string) LoginInfo {
-	return LoginInfo{id, pwd, siteName}
+	return LoginInfo{id, pwd, siteName, "N", ""}
 }
 func NewLoginInfo(id string, pwd string) LoginInfo {
-	return LoginInfo{id, pwd, "ticket.interpark.com"}
+	return LoginInfo{id, pwd, "ticket.interpark.com", "N", ""}
 }
 
 type PriceItem struct {
@@ -993,6 +998,12 @@ func (c *Controller) Login() error {
 		if err = c.WebDriver.Wait(condition); err != nil {
 			panic(err)
 		}
+		if c.LoginInfo.RedirectYN == "Y" {
+			if err = c.WebDriver.Get(c.LoginInfo.RedirectUrl); err != nil {
+				panic(err)
+			}
+		}
+
 	}
 	if c.LoginInfo.SiteName == "ticket.interpark.com" {
 		if err = c.WebDriver.Get("http://ticket.interpark.com/"); err != nil {
@@ -1084,6 +1095,11 @@ func (c *Controller) Login() error {
 		}
 		if err = c.WebDriver.Wait(condition); err != nil {
 			panic(err)
+		}
+		if c.LoginInfo.RedirectYN == "Y" {
+			if err = c.WebDriver.Get(c.LoginInfo.RedirectUrl); err != nil {
+				panic(err)
+			}
 		}
 	}
 	return nil

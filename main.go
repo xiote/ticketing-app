@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-
+	fmt.Println(os.Args)
 	DoWork()
 	//TestAll()
 }
@@ -41,10 +41,11 @@ func DoWork() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.NewLoginInfo("chmartha", "ch079577#")
+	loginInfo := ip.NewLoginInfo3("chmartha", "ch079577#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200905", "17시 00분")
-	seatsInfo := ip.NewSeatsInfo2([]string{"[R석] 1층-C블록10열-8"}, "N", "N", "N", "")
+	// "[R석] 1층-C블록10열-8"
+	seatsInfo := ip.NewSeatsInfo2([]string{os.Args[1]}, "N", "N", "N", "")
 	priceList := []ip.PriceItem{ip.NewPriceItem("R석", "일반", "1")}
 	priceInfo := ip.NewPriceInfo(priceList)
 	deliveryInfo := ip.NewDeliveryInfo("24000", "771110")
@@ -106,7 +107,7 @@ func Test4() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.NewLoginInfo("xiote12", "gkswlsdn78#")
+	loginInfo := ip.NewLoginInfo3("xiote12", "gkswlsdn78#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380")
 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20201111", "20시 00분")
 	seatsInfo := ip.NewSeatsInfo2([]string{"[R석] 객석1층-22열-42", "[R석] 객석1층-22열-43"}, "N", "N", "N", "")
@@ -171,7 +172,7 @@ func Test3() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.NewLoginInfo2("chmartha", "ch079577#", "sac.or.kr")
+	loginInfo := ip.NewLoginInfo3("chmartha", "ch079577#", "sac.or.kr", "Y", "http://www.sac.or.kr/SacHome/perform/detail?searchSeq=39139")
 	goodsInfo := ip.NewGoodsInfo("http://www.sac.or.kr/SacHome/perform/detail?searchSeq=39139")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200828", "20시 00분")
 	seatsInfo := ip.NewSeatsInfo2([]string{"[R석] 1층-C블록18열-1", "[R석] 1층-C블록18열-3"}, "N", "N", "N", "")
@@ -236,7 +237,7 @@ func Test2() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.NewLoginInfo("xiote12", "gkswlsdn78#")
+	loginInfo := ip.NewLoginInfo3("xiote12", "gkswlsdn78#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20005097")
 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20005097")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200911", "19시 30분")
 	seatsInfo := ip.NewSeatsInfo2([]string{"[B석] 3층-동R구역 7열-50", "[B석] 3층-동R구역 7열-52"}, "N", "Y", "Y", "306")
@@ -300,7 +301,7 @@ func Test1() {
 	}
 	defer wd.Quit()
 
-	loginInfo := ip.NewLoginInfo("xiote12", "gkswlsdn78#")
+	loginInfo := ip.NewLoginInfo3("xiote12", "gkswlsdn78#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772")
 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20003772")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200822", "18시 30분")
 	seatsInfo := ip.NewSeatsInfo([]string{"[A석] 2층-C구역9열-31", "[A석] 2층-C구역9열-32"})
