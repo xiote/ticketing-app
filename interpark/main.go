@@ -71,18 +71,25 @@ func NewPriceInfo(priceList []PriceItem) PriceInfo {
 }
 
 type SeatsInfo struct {
-	Seats           []string
-	ClickCloseBtnYN string
-	CaptchaYN       string
-	AreaYN          string
-	AreaName        string
+	Seats               []string
+	ClickCloseBtnYN     string
+	CaptchaYN           string
+	AreaYN              string
+	AreaName            string
+	CancelSeatYN        string
+	CancelSeatGradeName string
 }
 
 func NewSeatsInfo(seats []string) SeatsInfo {
-	return SeatsInfo{seats, "Y", "N", "N", ""}
+	return SeatsInfo{seats, "Y", "N", "N", "", "N", ""}
 }
+
 func NewSeatsInfo2(seats []string, clickCloseBtnYN string, captchaYN string, areaYN string, areaName string) SeatsInfo {
-	return SeatsInfo{seats, clickCloseBtnYN, captchaYN, areaYN, areaName}
+	return SeatsInfo{seats, clickCloseBtnYN, captchaYN, areaYN, areaName, "N", ""}
+}
+
+func NewSeatsInfo3(seats []string, clickCloseBtnYN string, captchaYN string, areaYN string, areaName string, cancelSeatYN string, cancelGradeName string) SeatsInfo {
+	return SeatsInfo{seats, clickCloseBtnYN, captchaYN, areaYN, areaName, cancelSeatYN, cancelGradeName}
 }
 
 type PlayDatePlaySeqInfo struct {
@@ -563,6 +570,78 @@ func (c *Controller) SelectSeats() error {
 
 	}
 
+	if c.SeatsInfo.CancelSeatYN == "Y" {
+		// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:167 ;top:160" alt="[VIP석] 1층-B열-3" title="[VIP석] 1층-B열-3" onclick="javascript: SelectSeat('SID0', '1', '1층', 'B열', '3', '002')">
+
+		for true {
+			if err = c.WebDriver.SwitchFrame(nil); err != nil {
+				panic(err)
+			}
+			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+				panic(err)
+			}
+			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+				panic(err)
+			}
+			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
+				panic(err)
+			}
+			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+				panic(err)
+			}
+
+			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//img[@class='stySeat' and starts-with(@alt, '["+c.SeatsInfo.CancelSeatGradeName+"]')]"); err != nil {
+				//panic(err)
+				goto REFRESH_SEATS
+			}
+			if err := webElement.Click(); err != nil {
+				//panic(err)
+				goto REFRESH_SEATS
+			}
+			break
+
+		REFRESH_SEATS:
+			// <a href="javascript:;" onclick="fnRefresh();"><img src="//ticketimage.interpark.com/TicketImage/onestop/btn_seat_again.gif" alt="좌석 다시 선택"></a>
+			if err = c.WebDriver.SwitchFrame(nil); err != nil {
+				panic(err)
+			}
+			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+				panic(err)
+			}
+			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+				panic(err)
+			}
+
+			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnRefresh();']"); err != nil {
+				panic(err)
+			}
+			if err := webElement.Click(); err != nil {
+				panic(err)
+			}
+
+		}
+
+	} else {
+		// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:335 ;top:241" alt="[VIP석] 1층-B구역14열-23" title="[VIP석] 1층-B구역14열-23" onclick="javascript: SelectSeat('SID49', '1', '1층', 'B구역14열', '23', '002')">
+		for _, seat := range c.Seats {
+			condition = func(wd selenium.WebDriver) (bool, error) {
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@alt='"+seat+"'] | //span[@title='"+seat+"']"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				if err := webElement.Click(); err != nil {
+					//panic(err)
+					return false, nil
+				}
+				return true, nil
+			}
+			if err = c.WebDriver.Wait(condition); err != nil {
+				panic(err)
+			}
+		}
+
+	}
+
 	// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:335 ;top:241" alt="[VIP석] 1층-B구역14열-23" title="[VIP석] 1층-B구역14열-23" onclick="javascript: SelectSeat('SID49', '1', '1층', 'B구역14열', '23', '002')">
 	for _, seat := range c.Seats {
 		condition = func(wd selenium.WebDriver) (bool, error) {
@@ -629,9 +708,18 @@ func (c *Controller) SelectPrice() error {
 				//panic(err)
 				return false, nil
 			}
-			if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"' and @pricegradename='"+priceItem.PriceGradeName+"']//option[@value='"+priceItem.SeatCount+"']"); err != nil {
-				//panic(err)
-				return false, nil
+			if c.SeatsInfo.CancelSeatYN == "Y" {
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"' and @pricegradename='"+priceItem.PriceGradeName+"']//option[@value='1']"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+
+			} else {
+				if webElement, err = wd.FindElement(selenium.ByXPATH, "//select[@seatgradename='"+priceItem.SeatGradeName+"' and @pricegradename='"+priceItem.PriceGradeName+"']//option[@value='"+priceItem.SeatCount+"']"); err != nil {
+					//panic(err)
+					return false, nil
+				}
+
 			}
 			if err := webElement.Click(); err != nil {
 				//panic(err)

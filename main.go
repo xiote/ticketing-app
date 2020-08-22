@@ -16,13 +16,15 @@ func main() {
 }
 
 func TestAll() {
-	Test1() // 인터파크, 주의메세지, 현장수령, 카드
+	Test1() // 인터파크  , 주의메세지,     , 현장수령, 카드
 
-	Test2() // 인터파크, 캡챠, 영역, 배송, 무통장
+	Test2() // 인터파크  , 캡챠      , 영역, 배송    , 무통장
 
-	Test4() // 인터파크, 현장수령, 무통장
+	Test4() // 인터파크  ,           ,     , 현장수령, 무통장
 
-	Test3() // 예술의전당, 현장수령, 무통장
+	Test3() // 예술의전당,           ,     , 현장수령, 무통장
+
+	Test5() // 인터파크  ,           ,     , 배송    , 무통장, 취소표
 }
 
 func DoWork() {
@@ -44,11 +46,10 @@ func DoWork() {
 	loginInfo := ip.NewLoginInfo3("chmartha", "ch079577#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200905", "17시 00분")
-	// "[R석] 1층-C블록10열-8"
-	seatsInfo := ip.NewSeatsInfo2([]string{os.Args[1]}, "N", "N", "N", "")
-	priceList := []ip.PriceItem{ip.NewPriceItem("R석", "일반", "1")}
+	seatsInfo := ip.NewSeatsInfo3([]string{}, "N", "N", "N", "", "Y", "R석")
+	priceList := []ip.PriceItem{ip.NewPriceItem("R석", "일반", "2")}
 	priceInfo := ip.NewPriceInfo(priceList)
-	deliveryInfo := ip.NewDeliveryInfo("24000", "771110")
+	deliveryInfo := ip.NewDeliveryInfo("24001", "781025")
 	paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
 
 	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
@@ -56,11 +57,11 @@ func DoWork() {
 	if err := c.Login(); err != nil {
 		panic(err)
 	}
-	fmt.Print("Press ENTER to continue")
-	scanner = bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		break
-	}
+	//fmt.Print("Press ENTER to continue")
+	//scanner = bufio.NewScanner(os.Stdin)
+	//for scanner.Scan() {
+	//	break
+	//}
 
 	if err := c.GotoGoodsInfoPage(); err != nil {
 		panic(err)
@@ -90,6 +91,137 @@ func DoWork() {
 		break
 	}
 }
+func Test5() {
+
+	var scanner *bufio.Scanner
+
+	// Start a Selenium WebDriver server instance (if one is not already
+	// running).
+	selenium.SetDebug(true)
+
+	// Connect to the WebDriver instance running locally.
+	caps := selenium.Capabilities{"browserName": "chrome"}
+	wd, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
+	if err != nil {
+		panic(err)
+	}
+	defer wd.Quit()
+
+	loginInfo := ip.NewLoginInfo3("xiote12", "gkswlsdn78#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380")
+	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006380")
+	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20201111", "20시 00분")
+	seatsInfo := ip.NewSeatsInfo3([]string{}, "N", "N", "N", "", "Y", "R석")
+	priceList := []ip.PriceItem{ip.NewPriceItem("R석", "일반", "2")}
+	priceInfo := ip.NewPriceInfo(priceList)
+	deliveryInfo := ip.NewDeliveryInfo("24001", "781025")
+	paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
+
+	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
+
+	if err := c.Login(); err != nil {
+		panic(err)
+	}
+	//fmt.Print("Press ENTER to continue")
+	//scanner = bufio.NewScanner(os.Stdin)
+	//for scanner.Scan() {
+	//	break
+	//}
+
+	if err := c.GotoGoodsInfoPage(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPlayDatePlaySeq(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectSeats(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPrice(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectDelivery(); err != nil {
+		panic(err)
+	}
+	if err := c.SelectPayment(); err != nil {
+		panic(err)
+	}
+	if err := c.DoPay(); err != nil {
+		panic(err)
+	}
+
+	fmt.Print("Press ENTER to continue")
+	scanner = bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		break
+	}
+}
+
+//
+// func DoWork() {
+//
+// 	var scanner *bufio.Scanner
+//
+// 	// Start a Selenium WebDriver server instance (if one is not already
+// 	// running).
+// 	selenium.SetDebug(true)
+//
+// 	// Connect to the WebDriver instance running locally.
+// 	caps := selenium.Capabilities{"browserName": "chrome"}
+// 	wd, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer wd.Quit()
+//
+// 	loginInfo := ip.NewLoginInfo3("chmartha", "ch079577#", "ticket.interpark.com", "Y", "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
+// 	goodsInfo := ip.NewGoodsInfo("http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GroupCode=20006900")
+// 	playDatePlaySeqInfo := ip.NewPlayDatePlaySeqInfo2("20200905", "17시 00분")
+// 	// "[R석] 1층-C블록10열-8"
+// 	seatsInfo := ip.NewSeatsInfo2([]string{os.Args[1]}, "N", "N", "N", "")
+// 	priceList := []ip.PriceItem{ip.NewPriceItem("R석", "일반", "1")}
+// 	priceInfo := ip.NewPriceInfo(priceList)
+// 	deliveryInfo := ip.NewDeliveryInfo("24000", "771110")
+// 	paymentInfo := ip.NewPaymentInfo2("22004", "", "", "농협(중앙)")
+//
+// 	c := ip.NewController3(wd, loginInfo, goodsInfo, playDatePlaySeqInfo, seatsInfo, priceInfo, deliveryInfo, paymentInfo)
+//
+// 	if err := c.Login(); err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Print("Press ENTER to continue")
+// 	scanner = bufio.NewScanner(os.Stdin)
+// 	for scanner.Scan() {
+// 		break
+// 	}
+//
+// 	if err := c.GotoGoodsInfoPage(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.SelectPlayDatePlaySeq(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.SelectSeats(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.SelectPrice(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.SelectDelivery(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.SelectPayment(); err != nil {
+// 		panic(err)
+// 	}
+// 	if err := c.DoPay(); err != nil {
+// 		panic(err)
+// 	}
+//
+// 	fmt.Print("Press ENTER to continue")
+// 	scanner = bufio.NewScanner(os.Stdin)
+// 	for scanner.Scan() {
+// 		break
+// 	}
+// }
 
 func Test4() {
 
