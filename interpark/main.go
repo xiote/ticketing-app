@@ -219,11 +219,7 @@ func (c *Controller) SelectPlayDatePlaySeq() error {
 				//panic(err)
 				return false, nil
 			}
-			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
-				//panic(err)
-				return false, nil
-			}
-			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+			if err = c.WebDriver.SwitchFrame(nil); err != nil {
 				//panic(err)
 				return false, nil
 			}
@@ -389,11 +385,7 @@ func (c *Controller) SelectSeats() error {
 
 	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
 	condition = func(wd selenium.WebDriver) (bool, error) {
-		if webElement, err = wd.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
-			//panic(err)
-			return false, nil
-		}
-		if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		if err = c.WebDriver.SwitchFrame(1); err != nil {
 			//panic(err)
 			return false, nil
 		}
@@ -482,14 +474,18 @@ func (c *Controller) SelectSeats() error {
 
 			// 입력완료
 			// <a href="javascript:;" onclick="fnCheck()">입력완료</a>
-			if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[text()='입력완료']"); err != nil {
+			if _, err = wd.ExecuteScript("fnCheck()", nil); err != nil {
 				//panic(err)
 				return false, nil
 			}
-			if err := webElement.Click(); err != nil {
-				//panic(err)
-				return false, nil
-			}
+			// if webElement, err = wd.FindElement(selenium.ByXPATH, "//a[text()='입력완료']"); err != nil {
+			// 	//panic(err)
+			// 	return false, nil
+			// }
+			// if err := webElement.Click(); err != nil {
+			// 	//panic(err)
+			// 	return false, nil
+			// }
 			// <div id="divRecaptcha" class="capchaLayer" style=""></div>
 			if webElement, err = wd.FindElement(selenium.ByXPATH, "//div[@id='divRecaptcha']"); err != nil {
 				//panic(err)
@@ -522,11 +518,7 @@ func (c *Controller) SelectSeats() error {
 
 	// <iframe id="ifrmSeatDetail" name="ifrmSeatDetail" scrolling="auto" width="658px" height="619px" marginwidth="0" marginheight="0" frameborder="no" src=""></iframe>
 	condition = func(wd selenium.WebDriver) (bool, error) {
-		if webElement, err = wd.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
-			//panic(err)
-			return false, nil
-		}
-		if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+		if err = c.WebDriver.SwitchFrame(0); err != nil {
 			//panic(err)
 			return false, nil
 		}
@@ -574,19 +566,14 @@ func (c *Controller) SelectSeats() error {
 		// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:167 ;top:160" alt="[VIP석] 1층-B열-3" title="[VIP석] 1층-B열-3" onclick="javascript: SelectSeat('SID0', '1', '1층', 'B열', '3', '002')">
 
 		for true {
+			//time.Sleep(100 * time.Millisecond)
 			if err = c.WebDriver.SwitchFrame(nil); err != nil {
 				panic(err)
 			}
-			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+			if err = c.WebDriver.SwitchFrame(1); err != nil {
 				panic(err)
 			}
-			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
-				panic(err)
-			}
-			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeatDetail"); err != nil {
-				panic(err)
-			}
-			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+			if err = c.WebDriver.SwitchFrame(1); err != nil {
 				panic(err)
 			}
 
@@ -605,17 +592,23 @@ func (c *Controller) SelectSeats() error {
 			if err = c.WebDriver.SwitchFrame(nil); err != nil {
 				panic(err)
 			}
-			if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+			if err = c.WebDriver.SwitchFrame(1); err != nil {
 				panic(err)
 			}
-			if err = c.WebDriver.SwitchFrame(webElement); err != nil {
-				panic(err)
-			}
+			// if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+			// 	panic(err)
+			// }
+			// if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+			// 	panic(err)
+			// }
 
-			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnRefresh();']"); err != nil {
-				panic(err)
-			}
-			if err := webElement.Click(); err != nil {
+			// 			if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnRefresh();']"); err != nil {
+			// 				panic(err)
+			// 			}
+			// 			if err := webElement.Click(); err != nil {
+			// 				panic(err)
+			// 			}
+			if _, err = c.WebDriver.ExecuteScript("fnRefresh();", nil); err != nil {
 				panic(err)
 			}
 
@@ -642,40 +635,32 @@ func (c *Controller) SelectSeats() error {
 
 	}
 
-	// <img src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif" class="stySeat" style="left:335 ;top:241" alt="[VIP석] 1층-B구역14열-23" title="[VIP석] 1층-B구역14열-23" onclick="javascript: SelectSeat('SID49', '1', '1층', 'B구역14열', '23', '002')">
-	for _, seat := range c.Seats {
-		condition = func(wd selenium.WebDriver) (bool, error) {
-			if webElement, err = wd.FindElement(selenium.ByXPATH, "//img[@alt='"+seat+"'] | //span[@title='"+seat+"']"); err != nil {
-				//panic(err)
-				return false, nil
-			}
-			if err := webElement.Click(); err != nil {
-				//panic(err)
-				return false, nil
-			}
-			return true, nil
-		}
-		if err = c.WebDriver.Wait(condition); err != nil {
-			panic(err)
-		}
-	}
 	// <a href="javascript:;" onclick="fnSelect();"><img id="NextStepImage" src="http://ticketimage.interpark.com/TicketImage/onestop/btn_seat_confirm_on.gif" alt="좌석선택완료"></a>
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
 
 	// <iframe id="ifrmSeat" name="ifrmSeat" scrolling="no" width="100%" height="100%" marginwidth="0" marginheight="0" frameborder="no" src="/Book/loading.html"></iframe>
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+	// if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmSeat"); err != nil {
+	// 	panic(err)
+	// }
+	// if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	// 	panic(err)
+	// }
+	//
+	// if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnSelect();']"); err != nil {
+	// 	panic(err)
+	// }
+	// if err := webElement.Click(); err != nil {
+	// 	panic(err)
+	// }
+	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	if err = c.WebDriver.SwitchFrame(1); err != nil {
 		panic(err)
 	}
-
-	if webElement, err = c.WebDriver.FindElement(selenium.ByXPATH, "//a[@onclick='fnSelect();']"); err != nil {
-		panic(err)
-	}
-	if err := webElement.Click(); err != nil {
+	if _, err = c.WebDriver.ExecuteScript("fnSelect();", nil); err != nil {
 		panic(err)
 	}
 
@@ -690,10 +675,7 @@ func (c *Controller) SelectPrice() error {
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
-		panic(err)
-	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	if err = c.WebDriver.SwitchFrame(0); err != nil {
 		panic(err)
 	}
 
@@ -764,10 +746,7 @@ func (c *Controller) SelectDelivery() error {
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
-		panic(err)
-	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	if err = c.WebDriver.SwitchFrame(0); err != nil {
 		panic(err)
 	}
 
@@ -848,10 +827,7 @@ func (c *Controller) SelectPayment() error {
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
-		panic(err)
-	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	if err = c.WebDriver.SwitchFrame(0); err != nil {
 		panic(err)
 	}
 
@@ -951,10 +927,7 @@ func (c *Controller) DoPay() error {
 	if err = c.WebDriver.SwitchFrame(nil); err != nil {
 		panic(err)
 	}
-	if webElement, err = c.WebDriver.FindElement(selenium.ByID, "ifrmBookStep"); err != nil {
-		panic(err)
-	}
-	if err = c.WebDriver.SwitchFrame(webElement); err != nil {
+	if err = c.WebDriver.SwitchFrame(0); err != nil {
 		panic(err)
 	}
 

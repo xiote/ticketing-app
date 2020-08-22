@@ -11,7 +11,8 @@ import (
 
 func main() {
 	fmt.Println(os.Args)
-	DoWork()
+	Test4()
+	//DoWork()
 	//TestAll()
 }
 
@@ -20,9 +21,9 @@ func TestAll() {
 
 	Test2() // 인터파크  , 캡챠      , 영역, 배송    , 무통장
 
-	Test4() // 인터파크  ,           ,     , 현장수령, 무통장
-
 	Test3() // 예술의전당,           ,     , 현장수령, 무통장
+
+	Test4() // 인터파크  ,           ,     , 현장수령, 무통장
 
 	Test5() // 인터파크  ,           ,     , 배송    , 무통장, 취소표
 }
@@ -233,7 +234,8 @@ func Test4() {
 
 	// Connect to the WebDriver instance running locally.
 	caps := selenium.Capabilities{"browserName": "chrome"}
-	wd, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
+	//wd, err := selenium.NewRemote(caps, "http://localhost:4444/wd/hub")
+	wd, err := selenium.NewRemote(caps, "http://localhost:9515")
 	if err != nil {
 		panic(err)
 	}
